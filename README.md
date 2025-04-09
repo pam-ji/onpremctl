@@ -8,6 +8,11 @@ This is the controller for the pamji onprem infra. It servers as a low spec rout
  - a tailscale-  and a vault docker container
  - those are the minimum requirements to deploy the basis infra via IaC.
 
+## deployment
+- ssh into the openwrt router
+- git clone https://github.com/pam-ji/onpremctl
+- cd onpremctl
+- docker compose up
 
 ## onprem infra (in progress)
 
