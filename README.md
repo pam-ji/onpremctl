@@ -1,4 +1,6 @@
 # onpremctl
+Deploy tailscale and Vault via docker compose. 
+ those are the minimum requirements to deploy a basis infra via IaC.
 This is the controller for the pamji onprem infra. It servers as a low spec router, failover vpn access point and secrets manager. 
 
 ## requirements
