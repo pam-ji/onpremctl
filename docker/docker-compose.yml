@@ -10,13 +10,19 @@ networks:
 services:
 
   tailscale:
-
+    privileged: true
+    cap_add:
+      - net_admin
     entrypoint: /usr/local/bin/tailscaled
-    command: tailscale up --ssh --adverise-routes=200.0.0.0/8,192.168.0.0/16 --advertise-tags=ci
-
+    #command: tailscale --ssh --advertise-routes=200.0.0.0/8,192.168.0.0/16 --advertise-tags=ci
     container_name: tailscale
     image: tailscale/tailscale:latest
     restart: always
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_EXTRA_ARGS=--ssh --advertise-routes=200.0.0.0/8,192.168.0.0/16 --advertise-tags=ci
+      - TS_STATE_DIR=/usr/local/bin/tailscaled
+      - TS_USERSPACE=false
     networks:
       tailscale:
         ipv4_address: 200.2.3.1
