@@ -5,31 +5,39 @@ networks:
       config:
         - subnet: 200.0.0.0/8
           gateway: 200.0.0.1
+
     driver_opts:
       parent: enp3s0
+
 services:
 
   tailscale:
     privileged: true
+    hostname: controller
     cap_add:
       - net_admin
-    entrypoint: /usr/local/bin/tailscaled
-    #command: tailscale --ssh --advertise-routes=200.0.0.0/8,192.168.0.0/16 --advertise-tags=ci
+    entrypoint: /usr/local/bin/tailscaled&&tailscale up --ssh --advertise-routes=200.0.0.0/8,192.168.0.0/16 --advertise-tags=tag:ci --auth-key=$TS_AUTHKEY
+    # command: |
+    #           up --ssh --advertise-routes=200.0.0.0/8,192.168.0.0/16 --advertise-tags=ci
     container_name: tailscale
     image: tailscale/tailscale:latest
     restart: always
+    volumes:
+      - ${PWD}/controller/state:/var/lib/tailscale
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
-      - TS_EXTRA_ARGS=--ssh --advertise-routes=200.0.0.0/8,192.168.0.0/16 --advertise-tags=ci
-      - TS_STATE_DIR=/usr/local/bin/tailscaled
+      - TS_EXTRA_ARGS=--ssh --advertise-routes=200.0.0.0/8,192.168.0.0/16 --advertise-tags=tag:ci
+      - TS_STATE_DIR=/var/lib/tailscale
       - TS_USERSPACE=false
     networks:
+      default:
       tailscale:
-        ipv4_address: 200.2.3.1
+        ipv4_address: 200.254.0.3
 
   vault:
     image:  hashicorp/vault:latest
     container_name: vault
+    hostname: vault_1
     ports:
       - "8200:8200"
       - "8201:8201"
@@ -37,15 +45,11 @@ services:
     restart: always
     privileged: true
     networks:
+
       tailscale:
-        ipv4_address: 200.2.3.2
+        ipv4_address: 200.254.0.2
     volumes:
       - ./vault/logs:/vault/logs/
       - ./vault/data:/vault/data/
       - ./vault/conf.hcl:/vault/conf.hcl
       - ./vault/certs:/vault/certs/:rw
-      - ./vault/file:/vault/file/
-    cap_add:
-      - IPC_LOCK
-    entrypoint: vault server -config=/vault/conf.hcl
-

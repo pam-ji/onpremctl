@@ -28,6 +28,34 @@ This is the controller for the pamji onprem infra. It servers as a low spec rout
     TS_EXTRA_ARGS=--ssh --advertise-routes=200.0.0.0/8,192.168.0.0/16 --advertise-tags=ci
     ```
 - now you can deploy with `docker compose up`
+- unfortunately you need to click the login link in the docker compose output
+![compose output](https://private-user-images.githubusercontent.com/117015142/431870433-73881dfc-f984-4b07-9c9f-1bd1f274fa59.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDQyMDY2NjQsIm5iZiI6MTc0NDIwNjM2NCwicGF0aCI6Ii8xMTcwMTUxNDIvNDMxODcwNDMzLTczODgxZGZjLWY5ODQtNGIwNy05YzlmLTFiZDFmMjc0ZmE1OS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNDA5JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDQwOVQxMzQ2MDRaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1jODA3OWU4MGE3ZTUwZWI0ZTBkOTEzNzUxZTJjNjQzODgyOWU5MjEzM2NhMDhjZDAzZDIyZGY0YTYzNzJhMmUyJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.jknH1j98R_mkBQziRk7-u8u-v2wWWkOZI1cyNGH8Edk)
+> its on of the first lines of the tailscale logs
+
+## changing the avertised routes
+- ssh into the container
+  - since we are having ssh access via tailscale and wifi access via the router, we dont need to worry about breaking something
+```bash
+tailscale set --advertise-routes=200.0.0.0/8,192.168.0.0/16 
+```
+> this way you dont need to use tailscale down, or "" for the advertise routes to delete them
+
+## issues
+### initial login required
+- tailscale should use the ts_authkey which is available as a env var in the container and can be used via $TS_AUTHKEY, but somehow tailscale requires an initial login. the weird thing is tho, when you rerun compose, it does not ask for the login again and uses the authkey.
+
+### networking issues
+- make sure that openwrt allows your bridge to use the eth0 interface
+this is my current setup:
+![image](https://github.com/user-attachments/assets/dc67c094-8140-4c9c-b15d-eb6dd97296bc)
+
+under interfaces -> devices -> docker0
+
+![image](https://github.com/user-attachments/assets/07a3a945-e7b6-4fa6-ba6e-23d6d8856e69)
+
+firewall
+
+![image](https://github.com/user-attachments/assets/16daf153-5f39-4dd2-a4db-5d01cc64c320)
 
 ## onprem infra (in progress)
 
